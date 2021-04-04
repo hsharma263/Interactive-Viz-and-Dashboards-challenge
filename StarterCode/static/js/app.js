@@ -97,6 +97,7 @@ d3.json(path).then(function(data) {
     var bubble_trace =[{
         x: data.samples[0].otu_ids,
         y: data.samples[0].sample_values,
+        text: text_label,
         mode: "markers",
         marker: {
             size: data.samples[0].sample_values,
@@ -117,8 +118,17 @@ d3.json(path).then(function(data) {
 
 
 
+    console.log(data.metadata[0]);
 
-
+var selector = d3.select("#sample-metadata");
+    // Use `.html("") to clear any existing metadata
+    selector.html("");
+    // Use `Object.entries` to add each key and value pair to the panel
+    Object.entries(data.metadata[0]).forEach(([key, value]) => {
+      // Hint: Inside the loop, you will need to use d3 to append new
+      // tags for each key-value in the metadata.
+      selector.append("h4").text(`${key}: ${value}`);
+    });
 
 
 
