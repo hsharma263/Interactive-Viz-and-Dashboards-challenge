@@ -1,1 +1,2 @@
 # Interactive-Viz-and-Dashboards-challenge
+This activity uses Plotly and D3 to access data about Bellybutton Biome Diversity. Using the previously mentioned features, data is loaded in and presented in a sort of dashboard fashion. Subjects are selectable through a selector, which will display demographic information, in addition to various graphical elements to visualize the data. The website has been published to Github Pages and can be found at https://github.com/hsharma263/Interactive-Viz-and-Dashboards-challenge. 
