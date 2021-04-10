@@ -1,136 +1,100 @@
 const path = "../../data/samples.json";
 
-// d3.json(path).then(function(data){
-//     console.log(data);
-// });
+function make_plots(subject){
+    d3.json(path).then((data) => {
+        var data_array = data
+        .samples
+        .filter(subjects => {
+          return subjects.id == subject
+        });
+        
+        var result = data_array[0];
 
-// const dataPromise = d3.json(path);
-// console.log("Data Promise: ", dataPromise);
+        var bar_otu_ids = result.otu_ids.slice(0,10).map(id_num => {
+            return "OTU " + id_num;
+        }).reverse();
+
+        var sample_values = result.sample_values;
+        var otu_labels = result.otu_labels;
+
+        var bar_values = sample_values.slice(0, 10).reverse();
+        var bar_labels = otu_labels.slice(0, 10).reverse();
 
 
-
-
-
-d3.json(path).then(function(data) {
-    console.log(data);
-    // console.log(data.names);
-    // console.log(data.samples);
-    // console.log(data.samples[0].id);
-
-    console.log(data.samples[0].otu_ids);
-    // console.log(data.samples[0].otu_labels);
-    console.log(data.samples[0].sample_values.sort());
-
-
+        var bar_trace = [{
+            x: bar_values,  
+            y: bar_otu_ids,
+            text: bar_labels,
+            type: 'bar',
+            orientation: 'h'
+        }];
     
-    // for (var i = 0; i < 153; i++) {
-    //     console.log(data.samples[i].id);
-    // }
-    
-    var sortedSamples = data.samples[0].sample_values.sort(function(a, b) {
-        return b-a
+        var bar_layout = {
+            title: "Top 10 OTUs",
+       
+        };
+        Plotly.newPlot("bar", bar_trace, bar_layout)
+        
+        
+        var otu_ids = result.otu_ids.map(id_num => {
+            return id_num;
+        })
+        var bubble_trace = {
+            x: otu_ids,  
+            y: sample_values,
+            text: otu_labels,
+            mode: "markers",
+            marker: {
+              color: otu_ids,
+              size: sample_values
+            }
+        };
+      
+        var bubble_layout = {
+            xaxis: {
+                title: "OTU ID"
+            }
+        };
+            
+        Plotly.newPlot("bubble", [bubble_trace], bubble_layout)
     });
+};
 
-    console.log(sortedSamples);
-    
-    top_ten_data = sortedSamples.slice(0, 10);
-    console.log(top_ten_data);
-    // reversed_data = top_ten_data.reverse();
-    var text_label = data.samples[0].otu_labels;
+function metadata(subject) {
+    d3.json(path).then((data) => {
+        var metadata = data.metadata;
+        var data_array = metadata.filter(subjects => subjects.id == subject);
+        var result = data_array[0];
+        var demo_data = d3.select("#sample-metadata");
 
-    xVal = top_ten_data;
-    yVal = data.samples[0].otu_ids;
-
-    var trace1 = {
-        x: xVal,
-        y: yVal,
-        text: text_label,
-        type: "bar",
-        orientation: "h",
-    }
-
-    var plot_data = [trace1];
-
-    Plotly.newPlot("bar", plot_data)
-
-
-
-    // var xVal = data.samples[0].sample_values;
-    // var yVal = data.samples[0].otu_ids;
-    // var text_label = data.samples[0].otu_labels;
-    // var markerSize = data.samples[0].sample_values;
-    // var markerColor = data.samples[0].otu_ids;
-
-    // // console.log(ids);
-    // var trace = {
-    //     x: xVal,
-    //     y: yVal,
-    //     text: text_label,
-    //     // mode: "markers",
-    //     type: "bar",
-    //     orientation: "h",
-    //     // marker: {
-    //     //     color: markerColor,
-    //     //     size: markerSize},
-    //     transforms: {
-    //         order: "descending"
-    //     }
-    // };
-    // var bar_plot = [trace];
-
-    // var layout = {
-    //     yaxis: {
-    //         title: "OTU IDs",
-    //         ticktext: text_label
-    //     }
-    // };
-
-    // Plotly.newPlot("bar", bar_plot, layout);
-
-
-
-
-
-// BUBBLE PLOT
-
-    
-    var bubble_trace =[{
-        x: data.samples[0].otu_ids,
-        y: data.samples[0].sample_values,
-        text: text_label,
-        mode: "markers",
-        marker: {
-            size: data.samples[0].sample_values,
-            color: data.samples[0].otu_ids
-        }
-    }];
-
-    var bubble_layout = {
-        title: "Bellybutton Bacteria Bubble Chart",
-        xaxis:{
-            title: "OTU ID"
-        }
-
-    }
-
-    Plotly.newPlot("bubble", bubble_trace, bubble_layout);
-
-
-
-
-    console.log(data.metadata[0]);
-
-var selector = d3.select("#sample-metadata");
-    // Use `.html("") to clear any existing metadata
-    selector.html("");
-    // Use `Object.entries` to add each key and value pair to the panel
-    Object.entries(data.metadata[0]).forEach(([key, value]) => {
-      // Hint: Inside the loop, you will need to use d3 to append new
-      // tags for each key-value in the metadata.
-      selector.append("h4").text(`${key}: ${value}`);
+        demo_data.html("");
+      
+        Object.entries(result).forEach(([key, value]) => {
+            demo_data.append("h6").text(key + ': ' + value); 
+        })
     });
+};
 
+function optionChanged(new_subject) {
+    metadata(new_subject);
+    make_plots(new_subject);
+};
 
+function init() {
+    var subject_selector = d3.select("#selDataset");
+          
+    d3.json(path).then((data) => {
+        console.log(data);
+        var names = data.names;
+        names.forEach((subject) => {
+            subject_selector
+                .append("option")
+                .text(subject)
+                .property("value", subject);
+        });
+    })
+};
 
-});
+init();
+
 
